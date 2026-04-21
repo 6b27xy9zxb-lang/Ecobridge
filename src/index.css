@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap');
+
+:root {
+  --eco-dark:   #030806;
+  --eco-card:   #080f0a;
+  --eco-border: #0f1f13;
+  --eco-green:  #00FF87;
+  --eco-teal:   #00C9A7;
+  --eco-muted:  #3d5c47;
+  --eco-white:  #edfff5;
+  --eco-dim:    #162419;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--eco-dark);
+  color: var(--eco-white);
+  font-family: 'Cabinet Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── Custom Cursor ── */
+#cursor {
+  position: fixed;
+  width: 12px; height: 12px;
+  background: var(--eco-green);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transition: transform 0.15s ease, opacity 0.3s ease;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+}
+#cursor-ring {
+  position: fixed;
+  width: 40px; height: 40px;
+  border: 1px solid rgba(0,255,135,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+  transform: translate(-50%, -50%);
+}
+body:hover #cursor { opacity: 1; }
+a:hover ~ #cursor, button:hover ~ #cursor { transform: translate(-50%, -50%) scale(2.5); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--eco-dark); }
+::-webkit-scrollbar-thumb { background: var(--eco-green); border-radius: 2px; }
+
+/* ── Noise grain overlay ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.35;
+}
+
+/* ── Glow utilities ── */
+.glow     { box-shadow: 0 0 40px #00FF8755, 0 0 80px #00FF8722; }
+.glow-sm  { box-shadow: 0 0 20px #00FF8744; }
+.glow-text{ text-shadow: 0 0 40px #00FF87aa; }
+.glow-border { box-shadow: inset 0 0 30px rgba(0,255,135,0.05), 0 0 30px rgba(0,255,135,0.1); }
+
+/* ── Glass card ── */
+.glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.025) 0%, rgba(0,255,135,0.015) 100%);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(0,255,135,0.08);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+}
+.glass:hover {
+  border-color: rgba(0,255,135,0.2);
+  background: linear-gradient(135deg, rgba(0,255,135,0.04) 0%, rgba(0,201,167,0.02) 100%);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(0,255,135,0.1);
+}
+
+/* ── Magnetic button ── */
+.magnetic {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Keyframes ── */
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  33%     { transform: translateY(-12px) rotate(1deg); }
+  66%     { transform: translateY(-6px) rotate(-1deg); }
+}
+@keyframes drift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(30px, -20px) scale(1.05); }
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(0,255,135,0.4); }
+  70%  { box-shadow: 0 0 0 20px rgba(0,255,135,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,255,135,0); }
+}
+@keyframes scanline {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0; }
+}
+
+.float       { animation: float 6s ease-in-out infinite; }
+.drift       { animation: drift 10s ease-in-out infinite; }
+.pulse-ring  { animation: pulse-ring 2s ease-out infinite; }
+.spin-slow   { animation: spin-slow 20s linear infinite; }
+.spin-rev    { animation: spin-slow 15s linear infinite reverse; }
+.blink       { animation: blink 1s step-end infinite; }
+
+.shimmer-text {
+  background: linear-gradient(90deg, #edfff5 0%, #00FF87 50%, #edfff5 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ── Scanline effect on cards ── */
+.scanline-card {
+  position: relative;
+  overflow: hidden;
+}
+.scanline-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,135,0.3), transparent);
+  animation: scanline 3s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── Counter number font ── */
+.font-mono-display {
+  font-family: 'DM Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}

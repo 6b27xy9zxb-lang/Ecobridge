@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Home from './pages/Home'
 import ScopeMap from './pages/ScopeMap'
 import CareerShift from './pages/CareerShift'
@@ -9,47 +9,41 @@ import About from './pages/About'
 import Join from './pages/Join'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
+import Preloader from './components/Preloader'
 
 function CustomCursor() {
-  const cursorRef = useRef(null)
-  const ringRef = useRef(null)
-  const pos = useRef({ x: 0, y: 0 })
-  const ringPos = useRef({ x: 0, y: 0 })
+  const dot   = useRef(null)
+  const ring  = useRef(null)
+  const pos   = useRef({ x:0, y:0 })
+  const rPos  = useRef({ x:0, y:0 })
 
   useEffect(() => {
     const move = (e) => {
       pos.current = { x: e.clientX, y: e.clientY }
-      if (cursorRef.current) {
-        cursorRef.current.style.left = e.clientX + 'px'
-        cursorRef.current.style.top  = e.clientY + 'px'
+      if (dot.current) {
+        dot.current.style.left = e.clientX + 'px'
+        dot.current.style.top  = e.clientY + 'px'
       }
     }
     window.addEventListener('mousemove', move)
 
     let raf
-    const followRing = () => {
-      ringPos.current.x += (pos.current.x - ringPos.current.x) * 0.12
-      ringPos.current.y += (pos.current.y - ringPos.current.y) * 0.12
-      if (ringRef.current) {
-        ringRef.current.style.left = ringPos.current.x + 'px'
-        ringRef.current.style.top  = ringPos.current.y + 'px'
+    const follow = () => {
+      rPos.current.x += (pos.current.x - rPos.current.x) * 0.1
+      rPos.current.y += (pos.current.y - rPos.current.y) * 0.1
+      if (ring.current) {
+        ring.current.style.left = rPos.current.x + 'px'
+        ring.current.style.top  = rPos.current.y + 'px'
       }
-      raf = requestAnimationFrame(followRing)
+      raf = requestAnimationFrame(follow)
     }
-    raf = requestAnimationFrame(followRing)
+    raf = requestAnimationFrame(follow)
 
-    const grow = () => {
-      if (cursorRef.current) cursorRef.current.style.transform = 'translate(-50%,-50%) scale(2.5)'
-      if (ringRef.current) { ringRef.current.style.width = '60px'; ringRef.current.style.height = '60px' }
-    }
-    const shrink = () => {
-      if (cursorRef.current) cursorRef.current.style.transform = 'translate(-50%,-50%) scale(1)'
-      if (ringRef.current) { ringRef.current.style.width = '40px'; ringRef.current.style.height = '40px' }
-    }
-
-    document.querySelectorAll('a,button').forEach(el => {
-      el.addEventListener('mouseenter', grow)
-      el.addEventListener('mouseleave', shrink)
+    const enter = () => document.body.classList.add('cursor-hover')
+    const leave = () => document.body.classList.remove('cursor-hover')
+    document.addEventListener('mouseover', (e) => {
+      if (e.target.matches('a,button,[role=button]')) enter()
+      else leave()
     })
 
     return () => {
@@ -60,8 +54,8 @@ function CustomCursor() {
 
   return (
     <>
-      <div id="cursor" ref={cursorRef} />
-      <div id="cursor-ring" ref={ringRef} />
+      <div id="eco-cursor"       ref={dot}  />
+      <div id="eco-cursor-trail" ref={ring} />
     </>
   )
 }
@@ -69,10 +63,10 @@ function CustomCursor() {
 function PageTransition({ children }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity:0, y:16 }}
+      animate={{ opacity:1, y:0 }}
+      exit={{ opacity:0, y:-16 }}
+      transition={{ duration:0.4, ease:[0.16,1,0.3,1] }}
     >
       {children}
     </motion.div>
@@ -84,26 +78,32 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/"           element={<PageTransition><Home /></PageTransition>} />
-        <Route path="/scopemap"   element={<PageTransition><ScopeMap /></PageTransition>} />
-        <Route path="/careershift"element={<PageTransition><CareerShift /></PageTransition>} />
-        <Route path="/connector"  element={<PageTransition><Connector /></PageTransition>} />
-        <Route path="/about"      element={<PageTransition><About /></PageTransition>} />
-        <Route path="/join"       element={<PageTransition><Join /></PageTransition>} />
+        <Route path="/"            element={<PageTransition><Home /></PageTransition>} />
+        <Route path="/scopemap"    element={<PageTransition><ScopeMap /></PageTransition>} />
+        <Route path="/careershift" element={<PageTransition><CareerShift /></PageTransition>} />
+        <Route path="/connector"   element={<PageTransition><Connector /></PageTransition>} />
+        <Route path="/about"       element={<PageTransition><About /></PageTransition>} />
+        <Route path="/join"        element={<PageTransition><Join /></PageTransition>} />
       </Routes>
     </AnimatePresence>
   )
 }
 
-function App() {
+export default function App() {
+  const [loaded, setLoaded] = useState(false)
+
   return (
     <BrowserRouter>
       <CustomCursor />
-      <Navbar />
-      <AnimatedRoutes />
-      <Footer />
+      <Preloader onDone={() => setLoaded(true)} />
+      <motion.div
+        animate={{ opacity: loaded ? 1 : 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Navbar />
+        <AnimatedRoutes />
+        <Footer />
+      </motion.div>
     </BrowserRouter>
   )
 }
-
-export default App
